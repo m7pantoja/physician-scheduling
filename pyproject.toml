@@ -1,0 +1,20 @@
+[project]
+name = "rostering"
+version = "0.1.0"
+description = "Physician scheduling: generación de instancias sintéticas, evaluación y resolución (greedy, simulated annealing, MILP)"
+readme = "README.md"
+authors = [
+    { name = "m7pantoja", email = "m7pantoja@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "gurobipy>=13.0.2",
+    "highspy>=1.14.0",
+    "pulp>=3.3.2",
+    "pydantic>=2.13.4",
+    "scipy>=1.18.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.9.11,<0.10.0"]
+build-backend = "uv_build"
