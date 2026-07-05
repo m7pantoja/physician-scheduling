@@ -86,7 +86,7 @@ with tab_greedy:
 with tab_sa:
     st.caption(
         "*Simulated annealing* sobre el objetivo aumentado (Alg. 6.2): vecindario flip+swap "
-        "con aceptación de Metrópolis, la temperatura anela los términos soft y congela toda "
+        "con aceptación de Metropolis, la temperatura anela los términos soft y congela toda "
         "violación dura (Sección 6.3.4)."
     )
 
@@ -194,7 +194,7 @@ with tab_sa:
                     column_config={
                         "Z_modelo": st.column_config.NumberColumn(
                             format="%.4f",
-                            help="Valor de la función objetivo del modelo (Cap. 6): menor es mejor."),
+                            help="Valor de la función objetivo del modelo (Cap. 5): menor es mejor."),
                         "iteraciones": st.column_config.NumberColumn(format="%.0f"),
                         "t (s)": st.column_config.NumberColumn(format="%.2f"),
                     },
@@ -433,7 +433,7 @@ with tab_3m:
             column_config={
                 "Z_modelo": st.column_config.NumberColumn(
                     format="%.4f",
-                    help="Valor de la función objetivo del modelo (Cap. 6): menor es mejor."),
+                    help="Valor de la función objetivo del modelo (Cap. 5): menor es mejor."),
                 "factible": st.column_config.CheckboxColumn("factible"),
                 "déficit p_cob": st.column_config.NumberColumn(
                     format="%.0f", help="Plazas de demanda sin cubrir bajo esta solución."),

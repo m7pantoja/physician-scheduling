@@ -122,7 +122,7 @@ st.dataframe(
     column_config={
         "Z_modelo": st.column_config.NumberColumn(
             format="%.4f",
-            help="Valor de la función objetivo del modelo (Cap. 6): menor es mejor."),
+            help="Valor de la función objetivo del modelo (Cap. 5): menor es mejor."),
         "Δ Z_modelo": st.column_config.NumberColumn(
             format="%.4f",
             help="Diferencia frente a la mejor solución factible re-evaluada (0 en su fila)."),

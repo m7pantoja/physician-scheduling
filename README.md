@@ -41,7 +41,8 @@ corresponden a Gurobi.
 ## Interfaz
 
 Una aplicación Streamlit sobre el paquete permite generar, editar, resolver y evaluar
-instancias sin escribir código (detalle en `app/README.md`):
+instancias sin escribir código (detalle en `app/README.md`). Está desplegada en
+https://physician-scheduling.streamlit.app; para ejecutarla en local:
 
 ```
 uv run --group ui streamlit run app/streamlit_app.py

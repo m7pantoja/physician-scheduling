@@ -3,13 +3,16 @@
 Aplicación Streamlit para trabajar de forma interactiva con el motor de *physician
 scheduling* del TFG: generar instancias sintéticas, editarlas, resolverlas con los tres
 métodos (greedy, *simulated annealing* y MILP exacto) y evaluar o comparar las soluciones
-con la función objetivo del modelo (Caps. 5–7).
+con la función objetivo del modelo (Caps. 5–6).
 
 La app es una capa aparte: **no modifica el paquete `rostering`** (`src/rostering/`), que
 sigue siendo la única fuente de la semántica del modelo (términos del objetivo,
 restricciones duras, normalizadores).
 
 ## Lanzar
+
+Hay un despliegue público en https://physician-scheduling.streamlit.app (Streamlit
+Community Cloud; sin licencia de Gurobi, el MILP se resuelve con HiGHS). En local:
 
 ```bash
 uv run --group ui streamlit run app/streamlit_app.py

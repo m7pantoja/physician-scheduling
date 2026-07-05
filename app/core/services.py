@@ -3,7 +3,9 @@
 Traduce en ambos sentidos: del motor a la UI (resúmenes, matrices para heatmaps, informes
 de evaluación como DataFrames) y de la UI al motor (tablas editadas que se convierten de
 vuelta en una `Instance` validada). Toda la semántica del modelo vive en el paquete; aquí
-no se re-implementa ningún término del objetivo ni ninguna restricción."""
+no se re-implementa ningún término del objetivo, y la única regla duplicada es
+`violation_marks`, que espeja las restricciones duras celda a celda para poder
+localizarlas en el cuadrante."""
 
 from __future__ import annotations
 
