@@ -51,7 +51,8 @@ app/
 ├── views/               # una vista por página (inicio, generador, ..., experimento)
 └── core/
     ├── store.py         # persistencia del workspace
-    ├── services.py      # fachada sobre rostering (resúmenes, informes, edición, localización de violaciones duras)
+    ├── services.py      # fachada sobre rostering (resúmenes, informes, edición,
+    │                    #   localización de violaciones duras)
     ├── charts.py        # figuras Plotly (paleta única, CVD-safe) y styler del cuadrante
     └── ui.py            # estilo global, cabeceras, badges y widgets compartidos
 ```

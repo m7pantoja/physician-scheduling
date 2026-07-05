@@ -142,9 +142,11 @@ with tab_sa:
     k = st.number_input("Réplicas (k)", 1, 20, 1, 1, key="sol_sa_k")
     sol_sa_name = st.text_input("Nombre de la solución", value=f"{inst_name}-sa",
                                 key=f"sol_sa_name_{inst_name}")
+    budget_preview = _build_cfg(int(base_seed)).max_iterations
     st.caption(
-        "En el caso base (12 médicos x 28 días) el esquema automático tarda del orden de "
-        "5 s por réplica."
+        f"Presupuesto de la búsqueda: {budget_preview:,} iteraciones por réplica".replace(",", " ")
+        + " (crece con el tamaño de la instancia y con rounds). Orientación: unas 200 000 "
+        "iteraciones son ~5 s en un portátil y varias veces más en un despliegue en la nube."
     )
 
     if st.button("Resolver", key="sol_sa_btn", type="primary"):
@@ -267,6 +269,10 @@ with tab_milp:
             result = services.run_milp(instance, config, time_limit=int(time_limit),
                                        coverage_hard=coverage_hard, engine=engine)
         info = result["info"]
+        engine = result["engine_used"]
+        if engine != "gurobi" and engine_choice == "Gurobi":
+            st.warning("Gurobi rechazó el modelo por el límite de tamaño de su licencia; "
+                       "se resolvió con HiGHS.")
         solver_params = {"engine": engine, "time_limit": int(time_limit),
                          "coverage_hard": coverage_hard}
         rec = services.make_solution_record(
@@ -376,6 +382,10 @@ with tab_3m:
                                                 time_limit=int(time_limit_3m),
                                                 coverage_hard=True, engine=engine_3m)
                 info_3m = milp_result["info"]
+                if milp_result["engine_used"] != engine_3m:
+                    status.write("Gurobi rechazó el modelo por el límite de tamaño de su "
+                                 "licencia; se resolvió con HiGHS.")
+                engine_3m = milp_result["engine_used"]
                 milp_solver_params = {"engine": engine_3m, "time_limit": int(time_limit_3m),
                                       "coverage_hard": True}
                 milp_rec = services.make_solution_record(

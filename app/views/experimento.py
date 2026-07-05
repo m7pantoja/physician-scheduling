@@ -136,6 +136,7 @@ if launch:
                     "gap": info["gap"],
                     "t_exacto": m["elapsed"],
                     "régimen": services.COVERAGE_LABELS.get(m["coverage_mode"], m["coverage_mode"]),
+                    "motor": m["engine_used"],
                 })
         except Exception as exc:
             row["error"] = str(exc)

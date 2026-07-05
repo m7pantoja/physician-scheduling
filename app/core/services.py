@@ -475,23 +475,36 @@ def run_milp(instance: Instance, config: ObjectiveConfig, *,
              time_limit: int = 60, coverage_hard: bool = True,
              engine: str = "highs") -> dict:
     """Resolución exacta (MILP). Si la cobertura dura resulta infactible, se repite en
-    régimen blando (déficit penalizado), como en el harness del Cap. 7. Devuelve
-    {'roster', 'info', 'coverage_mode', 'elapsed'}."""
-    def make_solver():
-        if engine == "gurobi":
+    régimen blando (déficit penalizado), como en el harness del Cap. 7. Si Gurobi
+    rechaza el modelo por licencia (la limitada por tamaño que trae pip cuando no hay
+    licencia completa), se repite con HiGHS: `engine_used` informa del motor efectivo.
+    Devuelve {'roster', 'info', 'coverage_mode', 'engine_used', 'elapsed'}."""
+    def make_solver(eng: str):
+        if eng == "gurobi":
             return pulp.GUROBI(msg=False, timeLimit=time_limit)
         return pulp.HiGHS(msg=False, timeLimit=time_limit)
 
+    def attempt(eng: str) -> tuple[Roster, dict, str]:
+        roster, info = solve_exact(instance, config, solver=make_solver(eng),
+                                   break_symmetry=False, coverage_hard=coverage_hard)
+        mode = "hard" if coverage_hard else "soft"
+        if coverage_hard and info["status"] == "Infeasible":
+            roster, info = solve_exact(instance, config, solver=make_solver(eng),
+                                       break_symmetry=False, coverage_hard=False)
+            mode = "soft"
+        return roster, info, mode
+
     t0 = time.perf_counter()
-    roster, info = solve_exact(instance, config, solver=make_solver(),
-                               break_symmetry=False, coverage_hard=coverage_hard)
-    mode = "hard" if coverage_hard else "soft"
-    if coverage_hard and info["status"] == "Infeasible":
-        roster, info = solve_exact(instance, config, solver=make_solver(),
-                                   break_symmetry=False, coverage_hard=False)
-        mode = "soft"
+    engine_used = engine
+    try:
+        roster, info, mode = attempt(engine)
+    except Exception as exc:
+        if engine != "gurobi" or "license" not in str(exc).lower():
+            raise
+        engine_used = "highs"
+        roster, info, mode = attempt("highs")
     return {"roster": roster, "info": info, "coverage_mode": mode,
-            "elapsed": time.perf_counter() - t0}
+            "engine_used": engine_used, "elapsed": time.perf_counter() - t0}
 
 
 def make_solution_record(*, name: str, instance_name: str, solver: str,
