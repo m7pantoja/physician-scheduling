@@ -124,10 +124,14 @@ def load_instance(name: str) -> Instance:
 
 
 def instance_meta(name: str) -> InstanceMeta:
-    """Ficha de la instancia; si falta el sidecar (archivo copiado a mano), se sintetiza."""
+    """Ficha de la instancia; si falta el sidecar o no valida (archivo copiado o editado
+    a mano), se sintetiza."""
     path = INSTANCES_DIR / f"{name}.meta.json"
     if path.exists():
-        return InstanceMeta.model_validate_json(path.read_text(encoding="utf-8"))
+        try:
+            return InstanceMeta.model_validate_json(path.read_text(encoding="utf-8"))
+        except ValueError:
+            pass
     mtime = datetime.fromtimestamp((INSTANCES_DIR / f"{name}.json").stat().st_mtime).astimezone()
     return InstanceMeta(name=name, created=mtime.isoformat(timespec="seconds"), origin="importada")
 
@@ -178,8 +182,14 @@ def load_solution(name: str) -> SolutionRecord:
 
 
 def list_solutions(instance_name: str | None = None) -> list[SolutionRecord]:
-    """Registros de solución (opcionalmente solo los de una instancia), más reciente primero."""
-    records = [load_solution(n) for n in solution_names()]
+    """Registros de solución (opcionalmente solo los de una instancia), más reciente
+    primero. Un registro ilegible (JSON corrupto o truncado) se omite del listado."""
+    records = []
+    for n in solution_names():
+        try:
+            records.append(load_solution(n))
+        except ValueError:
+            continue
     if instance_name is not None:
         records = [r for r in records if r.instance_name == instance_name]
     return sorted(records, key=lambda r: r.created, reverse=True)

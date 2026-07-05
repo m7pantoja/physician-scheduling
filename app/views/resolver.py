@@ -98,8 +98,13 @@ with tab_sa:
         rec0 = ui.pick_solution("sol_sa_init_sol", instance_name=inst_name,
                                 label="Solución de partida")
         if rec0 is not None:
-            x0 = rec0.roster()
-            init_solution_name = rec0.name
+            if services.roster_matches_instance(instance, rec0.roster()):
+                x0 = rec0.roster()
+                init_solution_name = rec0.name
+            else:
+                st.error(f"La solución **{rec0.name}** no es compatible con la instancia "
+                         "actual (editada y sobrescrita después de resolver); se usará el "
+                         "greedy como solución inicial.")
 
     scheme_mode = st.radio("Modo del esquema de enfriamiento",
                            ["automático (schedule)", "manual"], key="sol_sa_scheme")

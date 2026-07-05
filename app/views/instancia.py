@@ -24,12 +24,16 @@ if sel is None:
     st.stop()
 name, disk_instance = sel
 
-work_key = f"inst_work_{name}"
+meta = store.instance_meta(name)
+# las claves de estado incluyen el sello de creación: si la instancia se borra y se
+# recrea con el mismo nombre, ni la copia de trabajo ni los editores deben heredar nada
+ver = f"{name}_{meta.created}"
+
+work_key = f"inst_work_{ver}"
 if work_key not in st.session_state:
     st.session_state[work_key] = disk_instance
 work = st.session_state[work_key]
 
-meta = store.instance_meta(name)
 st.caption(f"{name}  ·  {meta.origin}  ·  creada {meta.created[:16].replace('T', ' ')}")
 
 if work != disk_instance:
@@ -42,7 +46,7 @@ if work != disk_instance:
             st.session_state[work_key] = disk_instance
             # los editores conservan su propio estado por clave: al descartar hay que vaciarlos
             stale = [k for k in st.session_state
-                     if k.startswith((f"inst_ed_{name}_", f"inst_reg_{name}_"))]
+                     if k.startswith((f"inst_ed_{ver}_", f"inst_reg_{ver}_"))]
             for k in stale:
                 del st.session_state[k]
             st.rerun()
@@ -139,7 +143,7 @@ with tab_plantilla:
     edited_phys = st.data_editor(
         services.physicians_frame(work),
         num_rows="dynamic",
-        key=f"inst_ed_{name}_phys",
+        key=f"inst_ed_{ver}_phys",
         column_config={
             "id": st.column_config.NumberColumn("id", step=1, min_value=1),
             "clase": st.column_config.SelectboxColumn(
@@ -177,7 +181,7 @@ with tab_demanda:
                           for s in shift_cols})
     edited_demand = st.data_editor(
         services.demand_frame(work),
-        key=f"inst_ed_{name}_dem",
+        key=f"inst_ed_{ver}_dem",
         column_config=demand_config,
         hide_index=True,
     )
@@ -199,7 +203,7 @@ with tab_reglas:
     st.subheader("Cualificación γ_rs")
     edited_qual = st.data_editor(
         services.qualification_frame(work),
-        key=f"inst_ed_{name}_qual",
+        key=f"inst_ed_{ver}_qual",
     )
     if st.button("Aplicar cualificación", key="inst_apply_qual"):
         try:
@@ -219,7 +223,7 @@ with tab_reglas:
     eli_config = {"día": st.column_config.TextColumn("día", disabled=True)}
     edited_eli = st.data_editor(
         services.eligibility_frame(work),
-        key=f"inst_ed_{name}_eli",
+        key=f"inst_ed_{ver}_eli",
         column_config=eli_config,
         hide_index=True,
     )
@@ -239,13 +243,13 @@ with tab_reglas:
     r1, r2, r3 = st.columns(3)
     min_rest = r1.number_input("Descanso mínimo entre jornadas (h)", 0.1, 48.0,
                                float(work.regulations.min_rest_hours), 0.5,
-                               key=f"inst_reg_{name}_rest")
+                               key=f"inst_reg_{ver}_rest")
     min_weekly_rest = r2.number_input("Descanso semanal ininterrumpido (h)", 0.1, 72.0,
                                       float(work.regulations.min_weekly_rest_hours), 0.5,
-                                      key=f"inst_reg_{name}_weekly")
+                                      key=f"inst_reg_{ver}_weekly")
     ceiling = r3.number_input("Techo semanal de media (h)", 0.1, 100.0,
                               float(work.regulations.weekly_hours_ceiling), 0.5,
-                              key=f"inst_reg_{name}_ceiling")
+                              key=f"inst_reg_{ver}_ceiling")
     if st.button("Aplicar régimen legal", key="inst_apply_reg"):
         try:
             new_work = services.rebuild_instance(work, regulations={
@@ -275,7 +279,7 @@ with tab_pref:
                         for s in services.shift_names(work)})
     edited_pref = st.data_editor(
         services.preferences_frame(work, pid),
-        key=f"inst_ed_{name}_pref_{pid}",
+        key=f"inst_ed_{ver}_pref_{pid}",
         column_config=pref_config,
         hide_index=True,
     )
@@ -294,15 +298,15 @@ with tab_pref:
 # Guardar
 # ---------------------------------------------------------------------------
 with tab_guardar:
-    st.caption("Sobrescribir no toca las soluciones ya guardadas de la versión anterior: "
-              "siguen siendo registros históricos válidos, pero evaluados contra la "
-              "instancia antigua.")
+    st.caption("Sobrescribir sustituye la instancia en disco. Las soluciones ya guardadas "
+              "de la versión anterior se conservan como registros históricos, pero pueden "
+              "quedar incompatibles con la nueva versión; las páginas de análisis lo "
+              "detectan y lo avisan.")
     c1, c2 = st.columns(2)
     with c1:
         st.write(f"**Sobrescribir {name}**")
         if st.button(f"Sobrescribir {name}", key="inst_save_overwrite", type="primary"):
             store.save_instance(work, name, origin="editada", overwrite=True)
-            st.session_state[work_key] = work
             st.success(f"Instancia **{name}** actualizada.")
             st.rerun()
     with c2:
@@ -311,6 +315,5 @@ with tab_guardar:
         if st.button("Guardar como", key="inst_save_as_btn", disabled=not new_name.strip()):
             final = store.save_instance(work, new_name, origin="editada")
             st.session_state["inst_sel"] = final
-            st.session_state[f"inst_work_{final}"] = work
             st.success(f"Instancia guardada como **{final}**.")
             st.rerun()

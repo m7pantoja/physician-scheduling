@@ -385,6 +385,17 @@ def marked_cell_labels(cell_marks: pd.DataFrame) -> set[tuple[str, str]]:
 # Evaluación
 # ---------------------------------------------------------------------------
 
+def roster_matches_instance(instance: Instance, roster: Roster) -> bool:
+    """Comprueba que todas las ternas del roster referencian médicos, días y turnos que
+    existen en la instancia. Una solución guardada queda huérfana si su instancia se
+    edita y sobrescribe después de resolver."""
+    ids = {p.id for p in instance.physicians}
+    names = {s.name for s in instance.shifts}
+    days = instance.calendar.days
+    return all(i in ids and 0 <= t < days and s in names
+               for (i, t, s) in roster.assignments)
+
+
 def evaluation_report(instance: Instance, roster: Roster, config: ObjectiveConfig) -> dict:
     """Informe completo de una solución: las tres Z, desglose de los siete términos
     (crudo, normalizador, peso y contribución con signo a Z_modelo) y las nueve hard.

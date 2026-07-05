@@ -34,6 +34,16 @@ if len(records) < 2:
     st.info("Selecciona al menos dos soluciones de esta instancia.")
     st.stop()
 
+orphans = [r.name for r in records
+           if not services.roster_matches_instance(instance, r.roster())]
+if orphans:
+    st.error("Quedan fuera de la comparación por no ser compatibles con la instancia "
+             "actual (editada y sobrescrita después de resolver): "
+             + ", ".join(f"**{n}**" for n in orphans) + ".")
+    records = [r for r in records if r.name not in orphans]
+    if len(records) < 2:
+        st.stop()
+
 st.divider()
 
 # ---------------------------------------------------------------------------

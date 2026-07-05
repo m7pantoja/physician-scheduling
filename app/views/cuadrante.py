@@ -29,6 +29,11 @@ except Exception:
     st.stop()
 
 roster = rec.roster()
+if not services.roster_matches_instance(instance, roster):
+    st.error(f"La solución **{rec.name}** no es compatible con la instancia "
+             f"**{rec.instance_name}** actual: referencia médicos, días o turnos que ya "
+             "no existen (la instancia se editó y sobrescribió después de resolver).")
+    st.stop()
 
 st.caption(
     f"{ui.solver_badge_md(rec.solver)} · "
@@ -52,12 +57,13 @@ st.subheader("Cuadrante médico × día")
 cells_df, phys_df = services.violation_marks(instance, roster)
 
 default_marks = (not bool(rec.metrics.get("feasible"))) or not cells_df.empty
-# la clave incluye la solución: el valor por defecto depende de su factibilidad y un
-# widget con key fija arrastraría el estado de la solución anterior
+# la clave incluye la solución y su sello: el valor por defecto depende de su factibilidad
+# y un widget con key fija arrastraría el estado de la solución anterior (o de una
+# homónima ya borrada)
 show_marks = st.toggle(
     "Señalar violaciones duras en el cuadrante",
     value=default_marks,
-    key=f"cua_marks_{rec.name}",
+    key=f"cua_marks_{rec.name}_{rec.created}",
 )
 
 codes = services.roster_matrix(instance, roster)

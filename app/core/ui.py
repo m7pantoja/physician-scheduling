@@ -94,7 +94,14 @@ def pick_instance(key: str, *, label: str = "Instancia") -> tuple[str, Instance]
         key=key,
         format_func=lambda n: f"{n}  ·  {by_name[n].origin}  ·  {by_name[n].created[:10]}",
     )
-    return name, store.load_instance(name)
+    try:
+        return name, store.load_instance(name)
+    except Exception as exc:
+        st.error(f"La instancia **{name}** no se puede cargar: su JSON está corrupto o no "
+                 "valida contra el modelo del paquete.")
+        with st.expander("Detalle del error"):
+            st.code(repr(exc))
+        return None
 
 
 def pick_solution(key: str, *, instance_name: str | None = None,

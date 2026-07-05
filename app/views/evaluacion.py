@@ -36,6 +36,11 @@ except Exception as exc:
     st.stop()
 
 roster = rec.roster()
+if not services.roster_matches_instance(instance, roster):
+    st.error(f"La solución **{rec.name}** no es compatible con la instancia "
+             f"**{rec.instance_name}** actual: referencia médicos, días o turnos que ya "
+             "no existen (la instancia se editó y sobrescribió después de resolver).")
+    st.stop()
 
 st.caption(f"Solución **{rec.name}** de la instancia **{rec.instance_name}** · "
            f"{ui.solver_badge_md(rec.solver)}")
@@ -54,9 +59,10 @@ except Exception:
 
 st.caption("Política con la que se resolvió; puedes modificarla para re-puntuar (la "
            "evaluación es independiente del método).")
-# la clave incluye la solución: al cambiar de solución, el formulario se siembra de nuevo
-# con la política registrada de la nueva (un widget con key fija ignoraría el nuevo initial)
-config = ui.objective_config_widget(f"eva_obj_{rec.name}", initial=initial)
+# la clave incluye la solución y su sello de creación: al cambiar de solución, o al
+# reutilizar un nombre tras un borrado, el formulario se siembra de nuevo con la política
+# registrada de la nueva (un widget con key fija ignoraría el nuevo initial)
+config = ui.objective_config_widget(f"eva_obj_{rec.name}_{rec.created}", initial=initial)
 
 report = services.evaluation_report(instance, roster, config)
 hard = report["hard"]
