@@ -2,5 +2,6 @@ __pycache__/
 *.py[co]
 .venv/
 data/rerun/
+data/workspace/
 out/
 .DS_Store

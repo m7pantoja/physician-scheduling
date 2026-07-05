@@ -22,6 +22,7 @@ src/rostering/       paquete Python
   storage.py         persistencia de instancias a JSON
 experiments/         drivers de los experimentos y análisis
 data/                CSV congelados: los resultados que usa la memoria
+app/                 interfaz Streamlit sobre el paquete (ver app/README.md)
 ```
 
 ## Instalación
@@ -36,6 +37,19 @@ El método exacto usa Gurobi (`gurobipy`; los experimentos se corrieron con lice
 académica). El greedy y el SA no dependen de ninguna licencia. `milp.solve_exact` admite
 también HiGHS (open source) como solver, pero los tiempos y certificaciones de la memoria
 corresponden a Gurobi.
+
+## Interfaz
+
+Una aplicación Streamlit sobre el paquete permite generar, editar, resolver y evaluar
+instancias sin escribir código (detalle en `app/README.md`):
+
+```
+uv run --group ui streamlit run app/streamlit_app.py
+```
+
+Las dependencias de interfaz (`streamlit`, `plotly`, `pandas`) viven en el grupo `ui` de
+`pyproject.toml`, separadas de las del motor. Sin licencia de Gurobi, la app resuelve el
+MILP con HiGHS.
 
 ## Datos
 
