@@ -25,3 +25,7 @@ ui = [
     "plotly>=6.8.0",
     "streamlit>=1.58.0",
 ]
+
+# los despliegues ejecutan `uv sync` sin --group: la interfaz debe entrar por defecto
+[tool.uv]
+default-groups = ["ui"]

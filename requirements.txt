@@ -1,5 +1,0 @@
-# Despliegue en Streamlit Community Cloud; el desarrollo local usa uv (grupo ui)
-.
-streamlit>=1.58.0
-plotly>=6.8.0
-pandas>=3.0.3
