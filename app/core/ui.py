@@ -59,8 +59,10 @@ def page_header(title: str, subtitle: str = "", kicker: str = "") -> None:
 
 
 def dataframe_height(n_rows: int, *, max_rows: int = 20) -> int:
-    """Altura en píxeles para un st.dataframe sin scroll hasta `max_rows` filas."""
-    return 38 + 35 * min(n_rows, max_rows)
+    """Altura en píxeles para un st.dataframe sin scroll hasta `max_rows` filas; una
+    tabla vacía reserva el hueco de una fila para el aviso de vacío (si no, el aviso
+    desborda la caja y se solapa con lo que venga debajo)."""
+    return 38 + 35 * min(max(n_rows, 1), max_rows)
 
 
 def fmt(x: float | None, dec: int = 4) -> str:

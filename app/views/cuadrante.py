@@ -56,15 +56,20 @@ st.subheader("Cuadrante médico × día")
 
 cells_df, phys_df = services.violation_marks(instance, roster)
 
-default_marks = (not bool(rec.metrics.get("feasible"))) or not cells_df.empty
-# la clave incluye la solución y su sello: el valor por defecto depende de su factibilidad
-# y un widget con key fija arrastraría el estado de la solución anterior (o de una
-# homónima ya borrada)
-show_marks = st.toggle(
-    "Señalar violaciones duras en el cuadrante",
-    value=default_marks,
-    key=f"cua_marks_{rec.name}_{rec.created}",
-)
+if cells_df.empty:
+    # sin celdas que señalar, el toggle prometería anillos que no pueden existir
+    show_marks = False
+    if not bool(rec.metrics.get("feasible")):
+        st.caption("Las violaciones duras de esta solución son a nivel de médico y no "
+                   "señalan celdas concretas del cuadrante: el detalle está más abajo.")
+else:
+    # la clave incluye la solución y su sello: un widget con key fija arrastraría el
+    # estado de la solución anterior (o de una homónima ya borrada)
+    show_marks = st.toggle(
+        "Señalar violaciones duras en el cuadrante",
+        value=True,
+        key=f"cua_marks_{rec.name}_{rec.created}",
+    )
 
 codes = services.roster_matrix(instance, roster)
 marked = services.marked_cell_labels(cells_df) if show_marks else set()
@@ -102,15 +107,21 @@ if len(cells_df) or len(phys_df):
             "cuadrante."
         )
         st.markdown("**Celdas implicadas**")
-        st.dataframe(
-            cells_df, width="stretch", height=ui.dataframe_height(len(cells_df)),
-            hide_index=True, column_order=["médico", "día", "restricción", "detalle"],
-        )
+        if len(cells_df):
+            st.dataframe(
+                cells_df, width="stretch", height=ui.dataframe_height(len(cells_df)),
+                hide_index=True, column_order=["médico", "día", "restricción", "detalle"],
+            )
+        else:
+            st.caption("Ninguna violación implica una celda concreta.")
         st.markdown("**Nivel de médico**")
-        st.dataframe(
-            phys_df, width="stretch", height=ui.dataframe_height(len(phys_df)),
-            hide_index=True, column_order=["médico", "restricción", "detalle"],
-        )
+        if len(phys_df):
+            st.dataframe(
+                phys_df, width="stretch", height=ui.dataframe_height(len(phys_df)),
+                hide_index=True, column_order=["médico", "restricción", "detalle"],
+            )
+        else:
+            st.caption("Ninguna violación a nivel de médico.")
 else:
     st.caption("Ninguna violación dura localizada.")
 
